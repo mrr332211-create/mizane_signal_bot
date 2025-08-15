@@ -23,7 +23,6 @@ def save_history(timestamp, price, signal):
             writer.writerow(["time", "price", "signal"])
         writer.writerow([timestamp, price, signal])
 
-# پیام خوش‌آمد فقط یک‌بار
 send_telegram_message("✅ ربات فعال شد - هر ۵ دقیقه مظنه و سیگنال را می‌فرستد")
 
 while True:
