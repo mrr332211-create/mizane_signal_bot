@@ -1,18 +1,23 @@
-import requests
-from config import BOT_TOKEN, CHAT_ID
-from keep_alive import keep_alive
+import time
+import datetime
+from config import START_HOUR, END_HOUR, CHAT_ID
+from modules.fetch_data import get_price_data
+from modules.indicators import calculate_indicators
+from modules.smc import detect_smc
+from telegram import Bot
 
-def send_message(text):
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    payload = {
-        "chat_id": CHAT_ID,
-        "text": text
-    }
-    r = requests.post(url, json=payload)
-    return r.json()
+bot = Bot(token=BOT_TOKEN)
 
-if __name__ == "__main__":
-    keep_alive()
-    # نمونه ارسال پیام هنگام روشن شدن
-    send_message("✅ ربات با موفقیت فعال شد و 24/7 روشن می‌ماند!")
+def send_signal(message):
+    bot.send_message(chat_id=CHAT_ID, text=message)
+
+while True:
+    now = datetime.datetime.now().hour
+    if START_HOUR <= now < END_HOUR:
+        df = get_price_data()
+        df = calculate_indicators(df)
+        smc_info = detect_smc(df)
+        if smc_info['signal'] in ['buy', 'sell']:
+            send_signal(f"Signal: {smc_info['signal'].upper()}\nDetails:\n{smc_info['details']}")
+    time.sleep(60)
     
