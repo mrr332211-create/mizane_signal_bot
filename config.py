@@ -2,7 +2,7 @@ import os
 
 # --- توکن‌ها و کلیدها ---
 BOT_TOKEN = os.getenv("8318356221:AAFvx_EXM2EoIHlYh_l9AvxkzVXxJZK_tm0")
-CHAT_ID = "-1002256481234"
+CHAT_ID = os.getenv("-1002256481234")
 GOLD_API_KEY = os.getenv("GOLD_API_KEY")
 USD_API_URL = os.getenv("USD_API_URL")
 
