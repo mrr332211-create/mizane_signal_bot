@@ -1,3 +1,4 @@
 requests
 pandas
-ta-lib
+numpy
+TA-Lib==0.4.17
