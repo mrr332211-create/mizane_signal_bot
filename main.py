@@ -1,23 +1,53 @@
 import time
-import datetime
-from config import START_HOUR, END_HOUR, CHAT_ID
-from modules.fetch_data import get_price_data
+from datetime import datetime
+from modules.fetch_data import fetch_data
 from modules.indicators import calculate_indicators
-from modules.smc import detect_smc
-from telegram import Bot
+from modules.smc import detect_smc_signals
+from config import BOT_TOKEN, CHAT_ID, START_HOUR, END_HOUR
+import requests
 
-bot = Bot(token=BOT_TOKEN)
+# تابع ارسال پیام به تلگرام
+def send_telegram_message(text):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    payload = {"chat_id": CHAT_ID, "text": text}
+    resp = requests.post(url, json=payload)
+    return resp.json()
 
-def send_signal(message):
-    bot.send_message(chat_id=CHAT_ID, text=message)
+# ===== پیام تست اولیه =====
+try:
+    resp = send_telegram_message("✅ تست اتصال ربات سیگنال AbrakiSignal موفق بود.")
+    print("پیام تست ارسال شد:", resp)
+except Exception as e:
+    print("❌ خطا در ارسال پیام تست:", e)
+    exit(1)  # اگر پیام تست نرفت، برنامه رو متوقف می‌کنیم
 
+
+# ===== حلقه اجرای اصلی =====
 while True:
-    now = datetime.datetime.now().hour
-    if START_HOUR <= now < END_HOUR:
-        df = get_price_data()
-        df = calculate_indicators(df)
-        smc_info = detect_smc(df)
-        if smc_info['signal'] in ['buy', 'sell']:
-            send_signal(f"Signal: {smc_info['signal'].upper()}\nDetails:\n{smc_info['details']}")
+    now = datetime.now()
+    current_hour = now.hour
+
+    if START_HOUR <= current_hour < END_HOUR:
+        try:
+            # 1. گرفتن دیتا
+            df = fetch_data()
+
+            # 2. محاسبه اندیکاتورها
+            df = calculate_indicators(df)
+
+            # 3. تشخیص سیگنال SMC
+            signal = detect_smc_signals(df)
+
+            # 4. اگر سیگنال Buy یا Sell پیدا شد → ارسال پیام
+            if signal:
+                send_telegram_message(signal)
+
+        except Exception as e:
+            print(f"خطا در اجرای ربات: {e}")
+
+    else:
+        print("⏳ خارج از ساعت کاری ربات هستیم...")
+
+    # تاخیر بین هر چک (می‌توانی تغییرش دهی)
     time.sleep(60)
     
