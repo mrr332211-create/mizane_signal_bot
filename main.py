@@ -1,39 +1,30 @@
 import time
-from datetime import datetime
-import requests
 from config import BOT_TOKEN, CHAT_ID, START_HOUR, END_HOUR
-from modules.fetch_data import fetch_data
-from modules.indicators import calculate_indicators
-from modules.smc import detect_smc_signals
+from modules.fetch_data import get_market_data
+from modules.smc import analyze_smc
+import requests
+from datetime import datetime
 
-# ارسال پیام تلگرام
-def send_telegram_message(text):
+def send_message(text):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    payload = {"chat_id": CHAT_ID, "text": text}
-    resp = requests.post(url, json=payload)
-    print(f"Status: {resp.status_code}, Response: {resp.text}")  # لاگ خروجی
-    return resp
+    requests.post(url, data={"chat_id": CHAT_ID, "text": text})
 
-# --- پیام تست اتصال و سیگنال آزمایشی ---
-try:
-    send_telegram_message("✅ AbrakiSignal Bot فعال شد! (پیام تست)")
-    send_telegram_message("📢 سیگنال آزمایشی: این فقط یک تست است.")
-except Exception as e:
-    print("❌ خطا در ارسال پیام تست:", e)
-    exit(1)
-
-# --- حلقه اصلی ---
 while True:
-    now = datetime.now()
-    if START_HOUR <= now.hour < END_HOUR:
-        try:
-            df = fetch_data()
-            df = calculate_indicators(df)
-            signal = detect_smc_signals(df)
+    now_hour = datetime.now().hour
 
-            if signal:
-                send_telegram_message(signal)
-        except Exception as e:
+    # فقط داخل ساعت‌های تعیین‌شده کار کن
+    if START_HOUR <= now_hour < END_HOUR:
+        data = get_market_data()
+        signal = analyze_smc(data)
+
+        if signal:  # اگر سیگنال معتبر پیدا شد
+            send_message(signal)
+        else:
+            send_message("⏳ صبر کنید... هنوز سیگنال سودده شناسایی نشده")
+    else:
+        send_message("⏳ بازار خارج از ساعت کاری است")
+
+    time.sleep(300)  # هر 5 دقیقه یک بار
             print("خطا در اجرای ربات:", e)
     else:
         print("⏳ خارج از ساعت کاری هستیم.")
