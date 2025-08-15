@@ -1,4 +1,4 @@
 requests
 pandas
 numpy
-TA-Lib==0.4.17
+TA-Lib==0.4.24
