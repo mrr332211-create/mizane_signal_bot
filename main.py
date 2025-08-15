@@ -11,12 +11,13 @@ def send_telegram_message(text):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     payload = {"chat_id": CHAT_ID, "text": text}
     resp = requests.post(url, json=payload)
+    print(f"Status: {resp.status_code}, Response: {resp.text}")  # لاگ خروجی
     return resp
 
-# --- پیام تست اتصال ---
+# --- پیام تست اتصال و سیگنال آزمایشی ---
 try:
-    send_telegram_message("✅ تست اتصال ربات AbrakiSignal موفق بود.")
-    print("پیام تست اولیه ارسال شد.")
+    send_telegram_message("✅ AbrakiSignal Bot فعال شد! (پیام تست)")
+    send_telegram_message("📢 سیگنال آزمایشی: این فقط یک تست است.")
 except Exception as e:
     print("❌ خطا در ارسال پیام تست:", e)
     exit(1)
@@ -38,3 +39,4 @@ while True:
         print("⏳ خارج از ساعت کاری هستیم.")
 
     time.sleep(60)  # هر یک دقیقه
+    
