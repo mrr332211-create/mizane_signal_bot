@@ -1,2 +1,8 @@
-TOKEN = "8318356221:AAHQU6SyAiixdNUFAQNpXdqxj-bc_gMh0k"
-CHAT_ID = "@SIGNAL_RAYEGAN_E_MAZANE_ABRAKI"
+import os
+
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+CHAT_ID = os.environ.get("CHAT_ID")
+
+if not BOT_TOKEN or not CHAT_ID:
+    raise ValueError("BOT_TOKEN or CHAT_ID is not set in environment variables.")
+  
