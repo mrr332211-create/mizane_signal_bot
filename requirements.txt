@@ -1,1 +1,5 @@
+requests
+pandas
+numpy
+python-telegram-bot==13.15
 TA-Lib==0.4.28
